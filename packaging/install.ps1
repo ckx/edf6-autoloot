@@ -23,6 +23,11 @@ function Find-Game {
         }
     }
 }
+function Get-DllHash([string]$Path) {
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($sha.ComputeHash([IO.File]::ReadAllBytes($Path))) }
+    finally { $sha.Dispose() }
+}
 try {
     if (-not $GameDir) { $GameDir = Find-Game }
     if (-not $GameDir) { $GameDir = (Read-Host 'Paste the EDF6 folder from Steam > Manage > Browse local files').Trim('"', ' ') }
@@ -46,7 +51,7 @@ try {
     if (-not (Test-Path -LiteralPath $source)) { throw 'Extract the whole release ZIP first.' }
     [IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
     if (Test-Path -LiteralPath $target) {
-        if ((Get-FileHash -LiteralPath $source).Hash -eq (Get-FileHash -LiteralPath $target).Hash) {
+        if ((Get-DllHash $source) -eq (Get-DllHash $target)) {
             Write-Host 'This AutoLoot DLL is already installed.'
             exit 0
         }
