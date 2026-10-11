@@ -1,0 +1,22 @@
+name: Build and test
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Build and package with MSVC
+        run: python tools/package.py
+      - name: Test PowerShell installer
+        run: python -m unittest discover -s tests -p installer_test.py
+      - name: Report missing game validation
+        run: Write-Output '::warning::CI has no EDF.dll. Game-code tests are skipped; live missions and multiplayer are not validated.'
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: EDF6AutoLoot-windows
+          path: release/*

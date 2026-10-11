@@ -3,8 +3,7 @@
 Repository setup is complete.
 
 Status on 2026-10-11: milestone 1 is done for offline play. Milestone 2 has the
-plugin, the clang/MinGW-w64 build with Wine tests, and game-code tests. Its MSVC
-build and its live offline session are still pending. Milestones 3 to 5 are
+plugin, the clang/MinGW-w64 build with Wine tests, and game-code tests. Its live offline session is still pending. Windows CI now builds with MSVC. Milestones 3 to 5 are
 pending, apart from the automated checks listed under milestone 3.
 
 ## 1. Establish the native interfaces
@@ -33,8 +32,8 @@ health remains untouched, and removal of the DLL restores ordinary behavior.
 
 Automated so far (`./build.sh -t` with `EDF6_GAME_DIR`): collection against the
 game's own pickup, online test and item lookup, and loading the built DLL against
-the mapped EDF.dll and outside the game. Pending: an MSVC build script and build,
-and the live offline session.
+the mapped EDF.dll and outside the game. The MSVC build script and Windows CI are included. The live offline session remains
+pending.
 
 ## 3. Verify attempt state and refusal
 
@@ -75,6 +74,13 @@ installation arrangement is documented, and failures do not block mission comple
 Automated GameNet-style tests supplement live sessions; they do not replace them.
 
 ## 5. Package and migrate
+
+The 0.1.0 prerelease includes Windows and Linux installers, automatic Steam folder
+discovery, backup on update and removal, a ZIP packager, and SHA-256 checksums.
+Installer fixtures exercise missing loader and Lootmaster refusal, installation,
+repeat installation, update, removal, backup contents and preservation of other mods.
+The package requires an existing EDFModLoader. No live installation or Lootmaster
+migration was performed as part of packaging. The live checks below remain pending.
 
 Build and verify on Windows and Linux/Wine, then perform live Proton checks.
 Package the plugin and concise install/removal instructions. Document any proven

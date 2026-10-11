@@ -30,7 +30,8 @@ target_link_libraries(EDF6AutoLoot PRIVATE AutoLootCore)
 if(MSVC)
     target_link_options(EDF6AutoLoot PRIVATE /DYNAMICBASE /NXCOMPAT /INCREMENTAL:NO)
 endif()
-set_target_properties(EDF6AutoLoot PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT_DIR}")
+set_target_properties(EDF6AutoLoot PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUT_DIR}"
+    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUT_DIR}")
 
 # --- Tests ---
 enable_testing()

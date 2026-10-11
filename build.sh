@@ -22,7 +22,7 @@ done
 # Always explicit: CMake keeps cached values.
 cmake -S "$root" -B "$build" -G Ninja -DCMAKE_TOOLCHAIN_FILE="$root/cmake/mingw-w64.cmake" \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo -DEDF6_REQUIRE_GAME=$require \
-    ${EDF6_GAME_DIR:+-DEDF6_GAME_DIR="$EDF6_GAME_DIR"}
+    "-DEDF6_GAME_DIR=${EDF6_GAME_DIR:-}"
 cmake --build "$build"
 
 if [ $test = 1 ]; then
