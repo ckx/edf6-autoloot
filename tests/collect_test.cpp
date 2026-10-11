@@ -57,6 +57,8 @@ enum Type : std::uint32_t { kWeapon = 0, kArmor = 1, kHealSmall = 2, kHealBig = 
 // pickups of this attempt at +0xE04 (all), +0xE08 (weapons) and +0xE0C (armor). Units: type +0xC0, taken +0xC4,
 // id +0xC8. The session modes as IsOnlineMode reads them: current index at +0x38 (-1: none), mode array at +0x20,
 // each mode's online flag at +0x68 into its virtual base.
+#pragma warning(push)
+#pragma warning(disable : 4324)  // Intentional padding for the game buffers aligned to 16 bytes.
 struct Field {
     struct Node {
         Node* next;
@@ -112,6 +114,8 @@ struct Field {
         return reinterpret_cast<TakeById>(game + kTakeItemById)(manager, id);
     }
 };
+
+#pragma warning(pop)
 
 // Defect: crates not credited, health taken, or crates already picked up credited again.
 void CollectsWeaponsAndArmorOnly() {
