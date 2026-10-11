@@ -1,6 +1,11 @@
 # Implementation plan
 
-Repository setup is complete. All implementation milestones below are pending.
+Repository setup is complete.
+
+Status on 2026-10-11: milestone 1 is done for offline play. Milestone 2 has the
+plugin, the clang/MinGW-w64 build with Wine tests, and game-code tests. Its MSVC
+build and its live offline session are still pending. Milestones 3 to 5 are
+pending, apart from the automated checks listed under milestone 3.
 
 ## 1. Establish the native interfaces
 
@@ -26,6 +31,11 @@ installation before attributing any behavior to this plugin.
 Done when reward totals match normal collection for eligible remaining crates,
 health remains untouched, and removal of the DLL restores ordinary behavior.
 
+Automated so far (`./build.sh -t` with `EDF6_GAME_DIR`): collection against the
+game's own pickup, online test and item lookup, and loading the built DLL against
+the mapped EDF.dll and outside the game. Pending: an MSVC build script and build,
+and the live offline session.
+
 ## 3. Verify attempt state and refusal
 
 | Scenario | Expected result |
@@ -42,6 +52,12 @@ health remains untouched, and removal of the DLL restores ordinary behavior.
 | Partial collection failure | Normal mission exit; no duplicate retry of credited items |
 | Unsupported image or mismatched hook | Clean refusal without partial patching |
 | Refusal followed by plugin unload | No surviving callbacks into the plugin |
+
+The game-code tests cover these rows against the real pickup: weapons, armor and
+health; no eligible crates; repeated notification; reward limit; partial failure;
+and refusal of a changed build, changed code or a taken slot. Refusal outside the
+game and the unload that follows are also covered. The remaining rows need live
+missions.
 
 Use tests that reach the production path and check observable outcomes. A synthetic
 state test cannot establish that an actual mission lifecycle hook runs at the right

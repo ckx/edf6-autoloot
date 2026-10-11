@@ -23,30 +23,35 @@ interfaces. Copy only the small pieces of infrastructure actually needed, after
 checking their licenses. Do not introduce a shared framework or a dependency on the
 sibling checkout to build this project.
 
-## Proposed runtime
+## Runtime
 
-The hook locations and call signatures remain research work.
+Implemented for offline play. `docs/research.md` holds the evidence for each step.
 
-1. Recognize an authoritative successful mission transition while the item manager
-   is alive and reward credit and synchronization can still complete.
-2. Start collection at most once for that mission attempt on the game thread.
-3. Find eligible weapon and armor crates and invoke the normal collection path,
-   respecting item ownership, removal and reward limits.
-4. Allow normal mission teardown, result calculation and saving to proceed.
-5. Clear attempt state on the appropriate lifecycle transitions.
+1. Every mission clear ends in the script call `internal_Exit(MISSION_RESULT_CLEAR)`,
+   after the clear banner and fade. That call reaches slot 3 of
+   `MissionScriptASImplement`'s vtable, the game's `Exit`. The plugin points that
+   slot at its own function. No game instruction changes.
+2. On a clear, before calling the game's `Exit`, the plugin walks DropItemManager's
+   item list once. For each weapon or armor crate not yet picked up, it marks the
+   crate picked up and calls the game's pickup function. The game counts it under
+   its usual 1024-pickup limit and removes the crate on its next update, as when a
+   player walks over it. Players do not move, loadouts do not change, and no pickup
+   sound or effect plays.
+3. The game's `Exit` then runs unchanged, and results, weapon rolls and saving
+   follow their normal path.
 
-The collection strategy must tolerate an item disappearing or list nodes changing
-as pickups execute. Decide whether to iterate, capture stable identities or use an
-existing bulk operation after tracing the game's behavior. A pointer snapshot alone
-is not a lifetime guarantee.
+There is no attempt state. The picked-up flag lives on each crate, so a repeated
+clear finds nothing left to take, and a retry or failure empties the list as before.
+The pickup does not change the list, so the walk sees a stable list. The walk has a
+fixed bound and runs under the guarded-read approach. A fault stops it. Crates
+already taken stay taken and are never credited twice. The mission then continues,
+and the log records the fault once.
 
-Success may be announced before the final crate can spawn. Research must establish
-the collection cutoff, synchronization ordering and whether a bounded drain within
-the successful transition is needed. Do not assume an arbitrary delay is sufficient.
+Crates that spawn after the `Exit` call are not collected. The clear path waits
+about 10 seconds before that call, and players can still pick up crates meanwhile.
 
-An error after partial collection must not cause already credited items to be
-awarded again. Keep normal game progression working if collection cannot complete,
-and log the failure once with enough context to diagnose it.
+The log `EDF6AutoLoot.log` beside the DLL records installation or refusal, and one
+line per clear with the crates taken and the counts the game added.
 
 ## Multiplayer
 
@@ -60,7 +65,8 @@ Test alongside EDF6Coop and with AutoLoot loaded in either plugin order.
 
 Host-only installation is desirable but is not a promise. Record the proven
 installation requirement after testing. Keep online collection disabled in the
-prototype until authority and reward behavior are understood. A custom network
+prototype until authority and reward behavior are understood. The prototype asks
+the game's own `IsOnlineMode` and leaves every crate alone online. A custom network
 protocol would require a new design decision, not an incidental implementation detail.
 
 ## Compatibility
